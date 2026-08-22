@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貨幣的時間價值互動計算器 | Time Value of Money Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#1e293b;
+    --panel-2:#243149;
+    --border:#334155;
+    --text:#e2e8f0;
+    --text-dim:#94a3b8;
+    --accent:#38bdf8;
+    --accent-2:#818cf8;
+    --pos:#34d399;
+    --neg:#f87171;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:linear-gradient(160deg,#0b1220,#131c33 60%,#0b1220);
+    color:var(--text);
+    min-height:100vh;
+    padding:24px 16px 64px;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  header{text-align:center;margin-bottom:28px;}
+  header h1{
+    font-size:1.8rem;
+    margin:0 0 6px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{color:var(--text-dim);margin:0;font-size:.95rem;}
+
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:20px;
+  }
+  .tab-btn{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    padding:10px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    font-size:.9rem;
+    font-weight:600;
+    transition:all .15s ease;
+  }
+  .tab-btn:hover{color:var(--text);border-color:var(--accent);}
+  .tab-btn.active{
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:#0b1220;
+    border-color:transparent;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:20px;
+  }
+  .card h2{margin:0 0 4px;font-size:1.2rem;}
+  .card .subtitle{color:var(--text-dim);font-size:.85rem;margin:0 0 18px;}
+
+  .field-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    margin-bottom:16px;
+  }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:.82rem;color:var(--text-dim);}
+  .field input, .field select, .flow-row input{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:.95rem;
+    outline:none;
+    width:100%;
+  }
+  .field input:focus, .field select:focus, .flow-row input:focus{border-color:var(--accent);}
+
+  .result-box{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-top:6px;
+  }
+  .result-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:6px 0;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .result-row .label{color:var(--text-dim);font-size:.88rem;}
+  .result-row .value{font-size:1.35rem;font-weight:700;color:var(--accent);}
+  .result-row .value.neg{color:var(--neg);}
+
+  .formula{
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+    font-size:.82rem;
+    line-height:1.7;
+    color:var(--text-dim);
+  }
+  .formula .zh{color:var(--text);font-weight:600;}
+  .formula code{
+    background:#0b1220;
+    border:1px solid var(--border);
+    padding:2px 6px;
+    border-radius:5px;
+    color:var(--accent);
+    font-size:.82rem;
+  }
+
+  .flow-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .flow-row{
+    display:grid;
+    grid-template-columns:70px 1fr 36px;
+    gap:8px;
+    align-items:center;
+  }
+  .flow-row .period-tag{
+    color:var(--text-dim);
+    font-size:.82rem;
+    text-align:center;
+    background:var(--panel-2);
+    border-radius:6px;
+    padding:8px 0;
+    border:1px solid var(--border);
+  }
+  .flow-row button.remove{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--neg);
+    border-radius:6px;
+    cursor:pointer;
+    font-size:.9rem;
+    height:100%;
+  }
+  .flow-actions{display:flex;gap:10px;margin-bottom:16px;}
+  .btn{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:.85rem;
+    font-weight:600;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.primary{
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:#0b1220;
+    border-color:transparent;
+  }
+
+  .error-msg{
+    color:var(--neg);
+    font-size:.85rem;
+    margin-top:8px;
+    display:none;
+  }
+
+  .chart-box{position:relative;height:300px;}
+  .chart-box canvas{width:100%;height:100%;}
+  .chart-card h2{margin-bottom:4px;}
+  .legend-note{
+    display:flex;
+    gap:18px;
+    font-size:.78rem;
+    color:var(--text-dim);
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .legend-note span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  footer{text-align:center;color:var(--text-dim);font-size:.75rem;margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>貨幣的時間價值互動計算器</h1>
+    <p>Time Value of Money Interactive Calculator</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="pv">現值 PV</button>
+    <button class="tab-btn" data-tab="fv">終值 FV</button>
+    <button class="tab-btn" data-tab="annuity">年金 Annuity</button>
+    <button class="tab-btn" data-tab="npv">淨現值 NPV</button>
+    <button class="tab-btn" data-tab="irr">內部報酬率 IRR</button>
+  </div>
+
+  <!-- PV -->
+  <section class="panel active" id="panel-pv">
+    <div class="card">
+      <h2>現值計算 Present Value</h2>
+      <p class="subtitle">已知未來的一筆金額，回推它在今天值多少錢。</p>
+      <div class="field-grid">
+        <div class="field">
+          <label>未來值 Future Value (FV)</label>
+          <input type="number" id="pv-fv" value="100000">
+        </div>
+        <div class="field">
+          <label>每期利率 Interest Rate (%)</label>
+          <input type="number" id="pv-rate" value="5" step="0.01">
+        </div>
+        <div class="field">
+          <label>期數 Number of Periods (n)</label>
+          <input type="number" id="pv-n" value="10" min="0" step="1">
+        </div>
+      </div>
+      <div class="result-box">
+        <div class="result-row">
+          <span class="label">現值 Present Value</span>
+          <span class="value" id="pv-result">--</span>
+        </div>
+      </div>
+      <div class="formula">
+        <span class="zh">公式：</span><code>PV = FV ÷ (1+r)^n</code><br>
+        現值＝未來值以利率折現回今天的金額。<br>
+        Present Value = the Future Value discounted back to today at rate r over n periods.
+      </div>
+    </div>
+  </section>
+
+  <!-- FV -->
+  <section class="panel" id="panel-fv">
+    <div class="card">
+      <h2>終值計算 Future Value</h2>
+      <p class="subtitle">已知現在的一筆金額，推算未來會累積成多少錢。</p>
+      <div class="field-grid">
+        <div class="field">
+          <label>現值 Present Value (PV)</label>
+          <input type="number" id="fv-pv" value="100000">
+        </div>
+        <div class="field">
+          <label>每期利率 Interest Rate (%)</label>
+          <input type="number" id="fv-rate" value="5" step="0.01">
+        </div>
+        <div class="field">
+          <label>期數 Number of Periods (n)</label>
+          <input type="number" id="fv-n" value="10" min="0" step="1">
+        </div>
+      </div>
+      <div class="result-box">
+        <div class="result-row">
+          <span class="label">終值 Future Value</span>
+          <span class="value" id="fv-result">--</span>
+        </div>
+      </div>
+      <div class="formula">
+        <span class="zh">公式：</span><code>FV = PV × (1+r)^n</code><br>
+        終值＝現值以複利利率成長 n 期後的金額。<br>
+        Future Value = the Present Value compounded forward at rate r over n periods.
+      </div>
+    </div>
+  </section>
+
+  <!-- Annuity -->
+  <section class="panel" id="panel-annuity">
+    <div class="card">
+      <h2>年金計算 Annuity</h2>
+      <p class="subtitle">每期支付（或收取）固定金額，計算其現值與終值。</p>
+      <div class="field-grid">
+        <div class="field">
+          <label>每期金額 Payment (PMT)</label>
+          <input type="number" id="an-pmt" value="10000">
+        </div>
+        <div class="field">
+          <label>每期利率 Interest Rate (%)</label>
+          <input type="number" id="an-rate" value="5" step="0.01">
+        </div>
+        <div class="field">
+          <label>期數 Number of Periods (n)</label>
+          <input type="number" id="an-n" value="10" min="1" step="1">
+        </div>
+        <div class="field">
+          <label>年金類型 Annuity Type</label>
+          <select id="an-type">
+            <option value="ordinary">普通年金 Ordinary (期末給付)</option>
+            <option value="due">期初年金 Annuity Due (期初給付)</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-box">
+        <div class="result-row">
+          <span class="label">年金現值 Present Value of Annuity</span>
+          <span class="value" id="an-pva">--</span>
+        </div>
+        <div class="result-row">
+          <span class="label">年金終值 Future Value of Annuity</span>
+          <span class="value" id="an-fva">--</span>
+        </div>
+      </div>
+      <div class="formula">
+        <span class="zh">公式：</span><code>PVA = PMT × [1-(1+r)^-n] / r</code>，<code>FVA = PMT × [(1+r)^n-1] / r</code><br>
+        年金現值／終值＝每期固定金額依年金因子折現或累積的總和（期初年金再乘以 (1+r)）。<br>
+        Annuity value = the level payment discounted or compounded across n periods (Annuity Due multiplies by (1+r)).
+      </div>
+    </div>
+  </section>
+
+  <!-- NPV -->
+  <section class="panel" id="panel-npv">
+    <div class="card">
+      <h2>淨現值計算 Net Present Value</h2>
+      <p class="subtitle">輸入折現率與各期現金流（第 0 期通常為投入成本，填負數）。</p>
+      <div class="field-grid" style="max-width:260px;">
+        <div class="field">
+          <label>折現率 Discount Rate (%)</label>
+          <input type="number" id="npv-rate" value="8" step="0.01">
+        </div>
+      </div>
+      <div id="npv-flow-list" class="flow-list"></div>
+      <div class="flow-actions">
+        <button class="btn" id="npv-add">＋ 新增期數 Add Period</button>
+        <button class="btn" id="npv-remove">－ 移除末期 Remove Last</button>
+      </div>
+      <div class="result-box">
+        <div class="result-row">
+          <span class="label">淨現值 Net Present Value</span>
+          <span class="value" id="npv-result">--</span>
+        </div>
+      </div>
+      <div class="formula">
+        <span class="zh">公式：</span><code>NPV = Σ CFt ÷ (1+r)^t</code>，t = 0..n<br>
+        淨現值＝將各期現金流折現到今天後加總；大於 0 代表這項投資划算。<br>
+        Net Present Value = the sum of all cash flows discounted to today; a positive NPV indicates a worthwhile investment.
+      </div>
+    </div>
+  </section>
+
+  <!-- IRR -->
+  <section class="panel" id="panel-irr">
+    <div class="card">
+      <h2>內部報酬率計算 Internal Rate of Return</h2>
+      <p class="subtitle">沿用與 NPV 相同的現金流序列，反推使 NPV 為 0 的報酬率。</p>
+      <div id="irr-flow-list" class="flow-list"></div>
+      <div class="flow-actions">
+        <button class="btn" id="irr-add">＋ 新增期數 Add Period</button>
+        <button class="btn" id="irr-remove">－ 移除末期 Remove Last</button>
+      </div>
+      <div class="result-box">
+        <div class="result-row">
+          <span class="label">內部報酬率 Internal Rate of Return</span>
+          <span class="value" id="irr-result">--</span>
+        </div>
+      </div>
+      <p class="error-msg" id="irr-error">無法求解：現金流需至少出現一次正負號變化（Cannot solve: cash flows need at least one sign change）。</p>
+      <div class="formula">
+        <span class="zh">公式：</span><code>0 = Σ CFt ÷ (1+IRR)^t</code>，以疊代法求解<br>
+        內部報酬率＝使淨現值恰好等於零的折現率，數值越高代表投資報酬率越好。<br>
+        Internal Rate of Return = the discount rate that makes NPV equal to zero, solved iteratively (Newton-Raphson).
+      </div>
+    </div>
+  </section>
+
+  <div class="card chart-card">
+    <h2>現金流時間軸圖 Cash Flow Timeline</h2>
+    <p class="subtitle">依目前分頁的輸入即時繪製各期現金流。</p>
+    <div class="chart-box"><canvas id="cashflow-chart"></canvas></div>
+    <p class="error-msg" id="chart-fallback">圖表元件載入失敗，計算功能仍可正常使用（Chart library failed to load; calculations still work）。</p>
+    <div class="legend-note">
+      <span><i class="dot" style="background:#34d399"></i>流入 Inflow (+)</span>
+      <span><i class="dot" style="background:#f87171"></i>流出 Outflow (-)</span>
+    </div>
+  </div>
+
+  <footer>純前端計算，資料不會送出或儲存。All calculations run locally in your browser.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- utilities ----------
+  const fmt = (n) => {
+    if (!isFinite(n)) return "--";
+    return n.toLocaleString("zh-TW", {maximumFractionDigits:2, minimumFractionDigits:2});
+  };
+  const fmtPct = (n) => {
+    if (!isFinite(n)) return "--";
+    return (n*100).toLocaleString("zh-TW", {maximumFractionDigits:4, minimumFractionDigits:2}) + "%";
+  };
+
+  function setResult(el, value, isCurrency=true){
+    el.textContent = isCurrency ? fmt(value) : value;
+    el.classList.toggle("neg", isFinite(value) && value < 0);
+  }
+
+  // ---------- tab switching ----------
+  const tabBtns = document.querySelectorAll(".tab-btn");
+  const panels = document.querySelectorAll(".panel");
+  let currentTab = "pv";
+
+  tabBtns.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      tabBtns.forEach(b=>b.classList.remove("active"));
+      panels.forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+      currentTab = btn.dataset.tab;
+      updateChart();
+    });
+  });
+
+  // ---------- chart ----------
+  let chart = null;
+  if (typeof Chart === "function") {
+    chart = new Chart(document.getElementById("cashflow-chart").getContext("2d"), {
+      type: "bar",
+      data: { labels: [], datasets: [{
+        label: "現金流 Cash Flow",
+        data: [],
+        backgroundColor: [],
+        borderRadius: 4,
+        barPercentage: 0.55,
+        maxBarThickness: 64
+      }]},
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display:false } },
+        scales: {
+          x: { title:{display:true, text:"期數 Period", color:"#94a3b8"}, ticks:{color:"#94a3b8"}, grid:{color:"#334155"} },
+          y: { title:{display:true, text:"金額 Amount", color:"#94a3b8"}, ticks:{color:"#94a3b8"}, grid:{color:"#334155"} }
+        }
+      }
+    });
+  } else {
+    document.getElementById("chart-fallback").style.display = "block";
+  }
+
+  function renderChart(points){
+    if (!chart) return;
+    chart.data.labels = points.map(p=>"第 "+p.t+" 期");
+    chart.data.datasets[0].data = points.map(p=>p.amount);
+    chart.data.datasets[0].backgroundColor = points.map(p=> p.amount >= 0 ? "#34d399" : "#f87171");
+    chart.update();
+  }
+
+  function updateChart(){
+    if (currentTab === "pv") {
+      const fv = parseFloat(document.getElementById("pv-fv").value) || 0;
+      const n = parseInt(document.getElementById("pv-n").value) || 0;
+      const rate = (parseFloat(document.getElementById("pv-rate").value) || 0) / 100;
+      const pv = calcPV(fv, rate, n);
+      renderChart([{t:0, amount:-pv}, {t:n, amount:fv}]);
+    } else if (currentTab === "fv") {
+      const pv = parseFloat(document.getElementById("fv-pv").value) || 0;
+      const n = parseInt(document.getElementById("fv-n").value) || 0;
+      const rate = (parseFloat(document.getElementById("fv-rate").value) || 0) / 100;
+      const fv = calcFV(pv, rate, n);
+      renderChart([{t:0, amount:-pv}, {t:n, amount:fv}]);
+    } else if (currentTab === "annuity") {
+      const pmt = parseFloat(document.getElementById("an-pmt").value) || 0;
+      const n = parseInt(document.getElementById("an-n").value) || 0;
+      const type = document.getElementById("an-type").value;
+      const points = [];
+      const start = type === "due" ? 0 : 1;
+      for (let t = start; t < start + n; t++) points.push({t, amount: pmt});
+      renderChart(points);
+    } else if (currentTab === "npv") {
+      renderChart(npvFlows.map((v,t)=>({t, amount:v})));
+    } else if (currentTab === "irr") {
+      renderChart(irrFlows.map((v,t)=>({t, amount:v})));
+    }
+  }
+
+  // ---------- PV ----------
+  function calcPV(fv, rate, n){ return fv / Math.pow(1+rate, n); }
+  function updatePV(){
+    const fv = parseFloat(document.getElementById("pv-fv").value) || 0;
+    const rate = (parseFloat(document.getElementById("pv-rate").value) || 0) / 100;
+    const n = parseInt(document.getElementById("pv-n").value) || 0;
+    setResult(document.getElementById("pv-result"), calcPV(fv, rate, n));
+    if (currentTab === "pv") updateChart();
+  }
+  ["pv-fv","pv-rate","pv-n"].forEach(id=>document.getElementById(id).addEventListener("input", updatePV));
+
+  // ---------- FV ----------
+  function calcFV(pv, rate, n){ return pv * Math.pow(1+rate, n); }
+  function updateFV(){
+    const pv = parseFloat(document.getElementById("fv-pv").value) || 0;
+    const rate = (parseFloat(document.getElementById("fv-rate").value) || 0) / 100;
+    const n = parseInt(document.getElementById("fv-n").value) || 0;
+    setResult(document.getElementById("fv-result"), calcFV(pv, rate, n));
+    if (currentTab === "fv") updateChart();
+  }
+  ["fv-pv","fv-rate","fv-n"].forEach(id=>document.getElementById(id).addEventListener("input", updateFV));
+
+  // ---------- Annuity ----------
+  function calcAnnuity(pmt, rate, n, due){
+    let pva, fva;
+    if (rate === 0) {
+      pva = pmt * n;
+      fva = pmt * n;
+    } else {
+      pva = pmt * (1 - Math.pow(1+rate, -n)) / rate;
+      fva = pmt * (Math.pow(1+rate, n) - 1) / rate;
+    }
+    if (due) { pva *= (1+rate); fva *= (1+rate); }
+    return {pva, fva};
+  }
+  function updateAnnuity(){
+    const pmt = parseFloat(document.getElementById("an-pmt").value) || 0;
+    const rate = (parseFloat(document.getElementById("an-rate").value) || 0) / 100;
+    const n = parseInt(document.getElementById("an-n").value) || 0;
+    const due = document.getElementById("an-type").value === "due";
+    const {pva, fva} = calcAnnuity(pmt, rate, n, due);
+    setResult(document.getElementById("an-pva"), pva);
+    setResult(document.getElementById("an-fva"), fva);
+    if (currentTab === "annuity") updateChart();
+  }
+  ["an-pmt","an-rate","an-n","an-type"].forEach(id=>document.getElementById(id).addEventListener("input", updateAnnuity));
+
+  // ---------- shared cash-flow list builder (NPV / IRR) ----------
+  function buildFlowList(containerId, flows, onChange){
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    flows.forEach((val, t)=>{
+      const row = document.createElement("div");
+      row.className = "flow-row";
+      row.innerHTML =
+        '<div class="period-tag">第 ' + t + ' 期</div>' +
+        '<input type="number" value="' + val + '" data-idx="' + t + '">' +
+        '<button class="remove" data-idx="' + t + '" title="移除此期">✕</button>';
+      container.appendChild(row);
+    });
+    container.querySelectorAll("input").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        flows[parseInt(inp.dataset.idx)] = parseFloat(inp.value) || 0;
+        onChange();
+      });
+    });
+    container.querySelectorAll("button.remove").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        if (flows.length <= 2) return;
+        flows.splice(parseInt(btn.dataset.idx), 1);
+        buildFlowList(containerId, flows, onChange);
+        onChange();
+      });
+    });
+  }
+
+  // ---------- NPV ----------
+  let npvFlows = [-100000, 30000, 30000, 30000, 30000, 30000];
+  function calcNPV(rate, flows){
+    return flows.reduce((sum, cf, t)=> sum + cf / Math.pow(1+rate, t), 0);
+  }
+  function updateNPV(){
+    const rate = (parseFloat(document.getElementById("npv-rate").value) || 0) / 100;
+    setResult(document.getElementById("npv-result"), calcNPV(rate, npvFlows));
+    if (currentTab === "npv") updateChart();
+  }
+  document.getElementById("npv-rate").addEventListener("input", updateNPV);
+  document.getElementById("npv-add").addEventListener("click", ()=>{
+    npvFlows.push(0);
+    buildFlowList("npv-flow-list", npvFlows, updateNPV);
+    updateNPV();
+  });
+  document.getElementById("npv-remove").addEventListener("click", ()=>{
+    if (npvFlows.length <= 2) return;
+    npvFlows.pop();
+    buildFlowList("npv-flow-list", npvFlows, updateNPV);
+    updateNPV();
+  });
+  buildFlowList("npv-flow-list", npvFlows, updateNPV);
+
+  // ---------- IRR ----------
+  let irrFlows = [-100000, 30000, 30000, 30000, 30000, 30000];
+
+  function hasSignChange(flows){
+    let pos=false, neg=false;
+    flows.forEach(v=>{ if (v>0) pos=true; if (v<0) neg=true; });
+    return pos && neg;
+  }
+
+  function npvAt(rate, flows){
+    return flows.reduce((sum, cf, t)=> sum + cf / Math.pow(1+rate, t), 0);
+  }
+
+  function calcIRR(flows){
+    if (!hasSignChange(flows)) return NaN;
+
+    // Newton-Raphson
+    let rate = 0.1;
+    for (let i=0; i<200; i++){
+      let npv = 0, d = 0;
+      for (let t=0; t<flows.length; t++){
+        npv += flows[t] / Math.pow(1+rate, t);
+        if (t>0) d += -t * flows[t] / Math.pow(1+rate, t+1);
+      }
+      if (Math.abs(npv) < 1e-7) return rate;
+      if (d === 0) break;
+      const next = rate - npv/d;
+      if (!isFinite(next) || next <= -0.999999) break;
+      rate = next;
+    }
+
+    // fallback: bisection, scan for a bracket first
+    let lo = null, hi = null;
+    let prevRate = -0.99, prevVal = npvAt(prevRate, flows);
+    for (let r = -0.98; r <= 10; r += 0.01){
+      const val = npvAt(r, flows);
+      if ((prevVal < 0 && val >= 0) || (prevVal > 0 && val <= 0)){
+        lo = prevRate; hi = r; break;
+      }
+      prevRate = r; prevVal = val;
+    }
+    if (lo === null) return NaN;
+    for (let i=0; i<200; i++){
+      const mid = (lo+hi)/2;
+      const val = npvAt(mid, flows);
+      if (Math.abs(val) < 1e-7) return mid;
+      if ((npvAt(lo, flows) < 0) === (val < 0)) lo = mid; else hi = mid;
+    }
+    return (lo+hi)/2;
+  }
+
+  function updateIRR(){
+    const rate = calcIRR(irrFlows);
+    const errEl = document.getElementById("irr-error");
+    const resEl = document.getElementById("irr-result");
+    if (isNaN(rate)){
+      resEl.textContent = "--";
+      errEl.style.display = "block";
+    } else {
+      resEl.textContent = fmtPct(rate);
+      resEl.classList.toggle("neg", rate < 0);
+      errEl.style.display = "none";
+    }
+    if (currentTab === "irr") updateChart();
+  }
+  document.getElementById("irr-add").addEventListener("click", ()=>{
+    irrFlows.push(0);
+    buildFlowList("irr-flow-list", irrFlows, updateIRR);
+    updateIRR();
+  });
+  document.getElementById("irr-remove").addEventListener("click", ()=>{
+    if (irrFlows.length <= 2) return;
+    irrFlows.pop();
+    buildFlowList("irr-flow-list", irrFlows, updateIRR);
+    updateIRR();
+  });
+  buildFlowList("irr-flow-list", irrFlows, updateIRR);
+
+  // ---------- initial run ----------
+  updatePV();
+  updateFV();
+  updateAnnuity();
+  updateNPV();
+  updateIRR();
+  updateChart();
+})();
+</script>
+</body>
+</html>
