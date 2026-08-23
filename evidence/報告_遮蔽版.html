@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三頁存摺的問題</title>
+<style>
+:root{
+  --ink:#16181d; --ink-2:#454b57; --ink-3:#6b7280;
+  --paper:#fff; --wash:#f6f7f9; --rule:#dcdfe4;
+  --accent:#8a1c1c; --accent-soft:#fbf2f2;
+  --flag:#0d5f4a; --flag-soft:#eef7f3;
+  --warn:#8a5a00; --warn-soft:#fdf6e7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wash);color:var(--ink);
+  font-family:"Noto Serif TC","Songti TC","PingFang TC","Microsoft JhengHei",serif;
+  font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.sheet{max-width:880px;margin:0 auto;background:var(--paper);
+  padding:56px 60px 80px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+h1{font-size:1.8rem;line-height:1.35;margin:0 0 10px}
+.sub{color:var(--ink-2);font-size:1.02rem;margin:0}
+.rule{height:3px;background:var(--accent);margin:22px 0 34px;width:76px;border-radius:2px}
+h2{font-size:1.2rem;margin:46px 0 14px;padding:0 0 8px;border-bottom:1px solid var(--rule)}
+h2 .num{color:var(--accent);font-weight:700;margin-right:.5em}
+h3{font-size:1.02rem;margin:26px 0 10px}
+p{margin:0 0 14px}
+ol,ul{margin:0 0 16px;padding-left:1.5em}
+li{margin-bottom:9px}
+code,.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.9em}
+.hl{background:linear-gradient(transparent 62%,#ffe08a 62%);font-weight:700}
+.redact{background:#2b2b2b;color:#2b2b2b;border-radius:2px;padding:0 .35em;
+  user-select:none;font-family:ui-monospace,monospace;letter-spacing:.1em}
+.tw{overflow-x:auto;margin:0 0 20px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;line-height:1.6;
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+th,td{border:1px solid var(--rule);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--wash);font-weight:700;white-space:nowrap;font-size:.84rem;color:var(--ink-2)}
+td.n,th.n{text-align:right;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+tr.tot td{background:var(--wash);font-weight:700}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);
+  padding:16px 20px;margin:24px 0;border-radius:0 6px 6px 0}
+.callout.ok{border-left-color:var(--flag);background:var(--flag-soft)}
+.callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout p:last-child,.callout ol:last-child,.callout ul:last-child{margin-bottom:0}
+.callout .lede{font-weight:700;display:block;margin-bottom:6px;font-size:1.05rem}
+.calc{font-family:ui-monospace,Menlo,monospace;font-size:.9rem;line-height:2;
+  background:var(--wash);border:1px solid var(--rule);border-radius:6px;
+  padding:16px 20px;margin:0 0 20px;white-space:pre;overflow-x:auto}
+.big{display:flex;flex-wrap:wrap;gap:14px;margin:24px 0}
+.big div{flex:1 1 150px;border:1px solid var(--rule);border-radius:8px;
+  padding:16px 18px;background:var(--wash)}
+.big b{display:block;font-size:1.9rem;line-height:1.2;color:var(--accent);
+  font-family:ui-monospace,Menlo,monospace}
+.big span{font-size:.82rem;color:var(--ink-3);display:block;margin-top:6px;
+  font-family:"Noto Sans TC",sans-serif;line-height:1.5}
+.notice{border:1px dashed var(--rule);border-radius:8px;padding:16px 20px;
+  margin:0 0 28px;font-size:.9rem;color:var(--ink-2);background:var(--wash)}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);
+  color:var(--ink-3);font-size:.84rem;line-height:1.7}
+@media (max-width:680px){.sheet{padding:32px 20px 56px}h1{font-size:1.35rem}body{font-size:15px}}
+@media print{body{background:#fff;font-size:11.5pt}.sheet{box-shadow:none;padding:0;max-width:none}
+  h2{page-break-after:avoid}table,.callout,.calc{page-break-inside:avoid}@page{margin:18mm 16mm}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<h1>三頁存摺，能證明一個父親四年沒付學費嗎？</h1>
+<p class="sub">一份家事法院卷宗證據的證明力分析（去識別化版本）</p>
+<div class="rule"></div>
+
+<div class="notice">
+<strong>關於本文</strong>　本文係就某家事事件卷宗內三頁銀行存摺影本所作之證明力分析。<strong>當事人姓名、帳號、學校名稱、案號等識別資訊均已遮蔽</strong>，僅保留與論證有關之金額、日期與交易型態。文中人物以「父」「母」「子」代稱。本文為證據解讀，非法律意見。
+</div>
+
+<h2><span class="num">一</span>事情是這樣的</h2>
+
+<p>一件家事訴訟中，母親主張：父親在兒子就讀大學四年期間，<strong>沒有支付學費</strong>。</p>
+
+<p>用來支持這項主張的證據，是<strong>兒子自己影印、交出來的三頁郵局存摺</strong>。這三頁被編入法院卷宗，頁碼連號。</p>
+
+<p>父親在多年後親自到法院閱卷，在數百頁卷宗裡逐頁翻找，才發現這三頁，以及卷內據此所作的不利陳述。</p>
+
+<div class="callout">
+<span class="lede">問題來了</span>
+<p>整本卷宗數百頁，涉及該帳戶的<span class="hl">只有這三頁</span>。</p>
+<p style="margin-bottom:0">這三頁，真的能證明「四年沒付學費」嗎？</p>
+</div>
+
+<h2><span class="num">二</span>先確認：這三頁本身是完整的</h2>
+
+<p>把三頁逐筆重建、逐列勾稽之後，數字完全對得起來：</p>
+
+<div class="calc">期初餘額                        $  66,247
+存入合計（15 筆）            ＋  $ 262,647
+提款合計（39 筆）            －  $ 126,460
+──────────────────────────────────────
+期末餘額                     ＝  $ 202,434    ✅ 與存摺原印相符</div>
+
+<div class="tw"><table>
+<tr><th>跨頁檢查點</th><th class="n">金額</th><th>結果</th></tr>
+<tr><td>第 1 頁末列餘額 ／ 第 2 頁首列結轉</td><td class="n">$68,392 ／ $68,392</td><td style="color:var(--flag);font-weight:700">✅ 相符</td></tr>
+<tr><td>第 2 頁末列餘額 ／ 第 3 頁首列結轉</td><td class="n">$218,494 ／ $218,494</td><td style="color:var(--flag);font-weight:700">✅ 相符</td></tr>
+</table></div>
+
+<div class="callout ok">
+<span class="lede">誤差 0 元</span>
+<p style="margin-bottom:0">這證明三頁是<strong>連續、未經抽換</strong>的完整區段 —— 中間沒有少任何一列。既然一列都沒少，那麼<span class="hl">起點和終點切在哪裡，就是有人決定的結果</span>，不是影印機的意外。</p>
+</div>
+
+<h2><span class="num">三</span>然後你會發現一個根本問題</h2>
+
+<h3>學費，本來就不會流經學生的存摺</h3>
+
+<p>台灣的大專校院學雜費，繳費方式一律是：<strong>學校寄發繳費單 → 繳費人把錢繳進學校的代收專戶</strong>。</p>
+
+<div class="tw"><table>
+<tr><th>繳費管道</th><th>錢流去哪</th><th>紀錄留在哪</th></tr>
+<tr><td>銀行臨櫃</td><td>學校代收專戶</td><td>收據聯、<strong>繳費人帳戶</strong></td></tr>
+<tr><td>ATM／網銀轉帳（輸入繳費單上的虛擬帳號）</td><td>學校代收專戶</td><td><strong>繳費人帳戶明細</strong></td></tr>
+<tr><td>超商代收</td><td>學校代收專戶</td><td>收據聯</td></tr>
+<tr><td>信用卡</td><td>學校代收專戶</td><td><strong>繳費人信用卡帳單</strong></td></tr>
+<tr><td>郵政劃撥</td><td>學校代收專戶</td><td>劃撥收據</td></tr>
+</table></div>
+
+<div class="callout">
+<span class="lede">不管走哪一條，錢都是「繳費人 → 學校」，完全不經過學生的個人帳戶</span>
+<p style="margin-bottom:0">所以 —— <span class="hl">在兒子的存摺上找不到學費，是繳費制度的必然結果，不是「父親沒付」的證據。</span></p>
+<p style="margin-top:14px;margin-bottom:0">這是把證據找錯了地方。該查的是<strong>學校的繳費紀錄</strong>和<strong>父親自己的帳戶與信用卡</strong>，三者都不在這三頁上。</p>
+</div>
+
+<h2><span class="num">四</span>而且，這本存摺從來沒被用來繳過任何東西</h2>
+
+<p>把五個月內全部 39 筆提款攤開：</p>
+
+<div class="tw"><table>
+<tr><th>提款方式</th><th class="n">筆數</th><th class="n">金額</th></tr>
+<tr><td>跨行提款（ATM 現金）</td><td class="n">32</td><td class="n">122,160</td></tr>
+<tr><td>卡片提款（ATM 現金）</td><td class="n">7</td><td class="n">4,300</td></tr>
+<tr><td><strong>臨櫃提款</strong></td><td class="n"><strong>0</strong></td><td class="n"><strong>0</strong></td></tr>
+<tr><td><strong>轉帳／匯款支出</strong></td><td class="n"><strong>0</strong></td><td class="n"><strong>0</strong></td></tr>
+<tr><td><strong>代扣繳（水電／電信／保費／貸款）</strong></td><td class="n"><strong>0</strong></td><td class="n"><strong>0</strong></td></tr>
+<tr class="tot"><td>合計</td><td class="n">39</td><td class="n">126,460</td></tr>
+</table></div>
+
+<p><strong>五個月裡，這個帳戶沒有把任何一塊錢轉給任何人或機構。</strong>全部支出都是到 ATM 領現金。</p>
+
+<p>用一個「從不用來繳費的帳戶」，主張「上面沒有學費紀錄所以沒繳費」—— 這在論理上站不住。</p>
+
+<h2><span class="num">五</span>再看涵蓋範圍：只有十分之一</h2>
+
+<div class="big">
+<div><b>5</b><span>這三頁涵蓋的月數</span></div>
+<div><b>48</b><span>大學四年的月數</span></div>
+<div><b>10.4%</b><span>涵蓋率</span></div>
+</div>
+
+<p>用不到十分之一的片段，推論其餘 43 個月的全部情形。</p>
+
+<h3>更關鍵的是起訖時點</h3>
+
+<p>大專校院的註冊繳費期程，通常是：</p>
+<ul>
+<li><strong>上學期</strong>：8 月下旬 ～ 9 月上旬</li>
+<li><strong>下學期</strong>：1 月下旬 ～ 2 月中旬</li>
+</ul>
+
+<p>而這三頁的區間是 <strong>9 月 4 日起、隔年 2 月 6 日止</strong>。</p>
+
+<div class="callout">
+<span class="lede">上學期的繳費期在起始日之前，下學期的繳費期在終止日前後</span>
+<p style="margin-bottom:0">換句話說 —— <span class="hl">就算父親真的繳了，在時序上也不可能落進這三頁的範圍。</span></p>
+<p style="margin-top:14px;margin-bottom:0">這三頁在結構上，<strong>根本不具備呈現學費繳納事實的可能性。</strong></p>
+</div>
+
+<h2><span class="num">六</span>反過來看，這三頁記載了什麼？</h2>
+
+<h3>母親在兩個多月內匯入 162,000 元</h3>
+
+<div class="tw"><table>
+<tr><th>時序</th><th>摘要（匯款人）</th><th class="n">存入</th><th class="n">交易後餘額</th></tr>
+<tr><td>第 1 個月</td><td>入戶匯款　<span class="redact">〇〇〇</span>（母）</td><td class="n">12,000</td><td class="n">74,932</td></tr>
+<tr><td>第 2 個月</td><td>跨行匯入　<span class="redact">〇〇〇</span>（母）</td><td class="n">50,000</td><td class="n">129,392</td></tr>
+<tr><td>第 3 個月</td><td>跨行匯入　<span class="redact">〇〇〇</span>（母）</td><td class="n">100,000</td><td class="n">226,372</td></tr>
+<tr class="tot"><td colspan="2">合計</td><td class="n">162,000</td><td class="n"></td></tr>
+</table></div>
+
+<h3>而這筆錢，幾乎沒有被動用</h3>
+
+<div class="tw"><table>
+<tr><th>時點</th><th class="n">餘額</th></tr>
+<tr><td>收到 100,000 元後</td><td class="n">226,372</td></tr>
+<tr><td><strong>兩個多月後</strong></td><td class="n"><strong>202,434</strong></td></tr>
+<tr class="tot"><td>兩個多月間，餘額只減少</td><td class="n">23,938</td></tr>
+</table></div>
+
+<p>兒子的實際提領水準是多少？以其中完整的一個月為例，全月提領合計 <strong>11,035 元</strong> —— 約 <strong>每月 1.1 萬</strong>。</p>
+
+<div class="callout">
+<span class="lede">這組數字說明什麼</span>
+<ol style="margin-bottom:0">
+<li>如果兒子真的因為父親不供給而生活困窘，<strong>這 162,000 元會被花掉，而不是原封留在帳上</strong>。</li>
+<li>以每月 1.1 萬的水準，162,000 元相當於他 <span class="hl">14 個月的全部生活費</span>。</li>
+<li>這三頁期間內，餘額從 65,947 元長到 202,434 元，<strong>淨增加 136,487 元</strong>。</li>
+</ol>
+</div>
+
+<p>再加上：五個月內<strong>沒有任何薪資轉帳</strong>，另有兩個外部帳戶長期、規律地匯款進來（一個每月固定 3,000 元）。這三頁呈現的，不是一個生活無著的圖像。</p>
+
+<h2><span class="num">七</span>還有一天，很難不注意</h2>
+
+<div class="tw"><table>
+<tr><th>時序</th><th>摘要</th><th class="n">提款</th><th class="n">存入</th><th class="n">餘額</th></tr>
+<tr><td>D－2</td><td>跨行轉入　<span class="redact">〇〇〇〇〇〇</span></td><td class="n"></td><td class="n">37,500</td><td class="n">108,417</td></tr>
+<tr><td>D 日</td><td>跨行轉入　<span class="redact">〇〇〇〇〇〇</span></td><td class="n"></td><td class="n">30,000</td><td class="n">138,417</td></tr>
+<tr><td>D 日</td><td>跨行提款　<span class="mono">同一台 ATM</span></td><td class="n">20,005</td><td class="n"></td><td class="n">118,412</td></tr>
+<tr><td>D 日</td><td>跨行提款　<span class="mono">同一台 ATM</span></td><td class="n">20,005</td><td class="n"></td><td class="n">98,407</td></tr>
+<tr><td>D 日</td><td>跨行提款　<span class="mono">同一台 ATM</span></td><td class="n">20,005</td><td class="n"></td><td class="n">78,402</td></tr>
+<tr><td>D 日</td><td>跨行提款　<span class="mono">同一台 ATM</span></td><td class="n">5,005</td><td class="n"></td><td class="n">73,397</td></tr>
+<tr class="tot"><td colspan="2">同日提領合計</td><td class="n">65,020</td><td class="n"></td><td class="n"></td></tr>
+</table></div>
+
+<ul>
+<li>三天內進帳 67,500 元，<strong>單日領走 65,000 元現金</strong>，進出幾乎相符。</li>
+<li>四筆的交易序號<strong>完全相同</strong> —— 是在<strong>同一台提款機連續操作</strong>。</li>
+<li>為什麼拆成四筆？因為<strong>跨行提款每筆上限 2 萬元</strong>。20,005＋20,005＋20,005＋5,005 —— 這是<span class="hl">把每筆上限吃滿、把錢完整換成現金</span>。</li>
+</ul>
+
+<h2><span class="num">八</span>結論</h2>
+
+<div class="callout warn">
+<p>這三頁存摺，作為「父親四年未支付學費」的證據：</p>
+<ol>
+<li><strong>證據方法錯誤</strong> —— 學費不流經學生帳戶，在這裡找不到是必然的；</li>
+<li><strong>載體不符</strong> —— 該帳戶五個月內零轉帳、零匯款，從未用於繳付任何款項；</li>
+<li><strong>涵蓋不足</strong> —— 僅及大學四年的 10.4%；</li>
+<li><strong>時序排除</strong> —— 起訖點恰好避開上、下兩學期的註冊繳費期間。</li>
+</ol>
+<p style="margin-bottom:0">而它<strong>確實證明</strong>的事情是：這名學生在該期間，持續受有多方金錢供給，且款項大多未被動用。</p>
+</div>
+
+<div class="callout">
+<span class="lede">一句話</span>
+<p style="margin-bottom:0">要證明一個人「沒做某件事」，不能拿一份<strong>本來就不會記載那件事</strong>、<strong>只涵蓋十分之一期間</strong>、而且<strong>剛好避開關鍵時點</strong>的紀錄來當證據。</p>
+</div>
+
+<footer>
+本文所有姓名、帳號、學校、案號等識別資訊均已遮蔽。金額、日期與交易型態係依卷內影本逐筆重建，並經餘額勾稽驗證（全期誤差 0 元）。<br>
+文中關於註冊繳費期程之敘述為一般通例，個案應以各校行事曆為準。本文為證據解讀與論理分析，不構成法律意見。
+</footer>
+
+</div>
+</body>
+</html>
