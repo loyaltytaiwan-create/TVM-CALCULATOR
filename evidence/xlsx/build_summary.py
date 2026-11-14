@@ -36,6 +36,7 @@ P_PO =f"{SRC}/6dcc59e9-_______________4-16_.xlsx"
 CH=[d for d in load(P_CHB,"交易明細","日期(民國)") if d.get("日期(民國)")]
 LT=[d for d in load(P_LTB,"明細","民國日期")      if d.get("民國日期")]
 PO=[d for d in load(P_PO,"交易明細","頁次")       if d.get("資料日期（民國）")]
+OB=[d for d in load(P_OB,"明細","民國日期")       if d.get("民國日期")]
 
 wb=Workbook(); wb.remove(wb.active)
 
@@ -92,6 +93,12 @@ for d in CH:
     if cat=="薪資": agg[k]["sal"]+=f(d.get("存入金額"))
     if cat in ("ATM提款","臨櫃提款"): agg[k]["cash"]+=f(d.get("提出金額")); agg[k]["n"]+=1
     if cat=="轉帳匯出": agg[k]["xfer"]+=f(d.get("提出金額"))
+for d in OB:                                  # OB202 92.08-95.07, raw cents -> NT$
+    y="0"+str(d["民國日期"])[:2]; m=str(d.get("摘要") or "")
+    k=("土銀 34574-1(OB202)",y)
+    if m.startswith("AH"): agg[k]["sal"]+=f(d.get("貸方"))/100
+    if m=="CD": agg[k]["cash"]+=f(d.get("借方"))/100; agg[k]["n"]+=1
+    if m in ("NBFF","CDIF","CDT"): agg[k]["xfer"]+=f(d.get("借方"))/100
 for d in LT:
     y=str(d["民國日期"])[:3]; m=str(d.get("摘要") or "")
     k=("土銀 34574-1",y)
@@ -100,7 +107,7 @@ for d in LT:
     if m in ("網路跨行","交換轉帳","轉帳","企業自行","中心轉帳"): agg[k]["xfer"]+=f(d.get("支出"))
 
 r=5; first=r
-for (acct,y),v in sorted(agg.items(), key=lambda x:(x[0][0]!="彰銀 29674-1", x[0][1])):
+for (acct,y),v in sorted(agg.items(), key=lambda x:({"彰銀 29674-1":0,"土銀 34574-1(OB202)":1}.get(x[0][0],2), x[0][1])):
     vals=[acct,"民國"+y,int(y)+1911,v["sal"],v["cash"],v["n"],v["xfer"]]
     for i,val in enumerate(vals,1):
         c=ws.cell(r,i,val); c.font=BODY; c.border=BOX
@@ -115,6 +122,12 @@ r+=2
 ws.cell(r,1,"★ 現金提領合計即為「離開銀行體系、無從以轉帳軌跡追查」之金額。房屋貸款如係以現金臨櫃繳納，必落在此一金額之內。").font=RED
 r+=1
 ws.cell(r,1,"　本表不主張該等現金之全部用途；僅證明有足額現金被提出，且其時序與房貸繳納期間相符。").font=BODY
+r+=1
+ws.cell(r,1,"※ 92～95 年（OB202）之「薪資／入帳」僅計 AH* 薪資／鐘點費；該期間之 FHEO 跨行轉入係期貨出入金，不計為收入。"
+            "95～105 年同理僅計 AH* 與匯款入戶。").font=NOTE
+r+=1
+ws.cell(r,1,"※ 民國 94 年「轉帳轉出」17,696,597 元係期貨帳戶出入金往復所致（同一筆資金反覆進出），"
+            "不代表該年度之實際支出，亦不得解為資產減損。該年 FHEO 跨行轉入亦同額級距。").font=RED
 
 # ───────────────────────────────── 3 月初現金提領（房貸佐證）
 ws=wb.create_sheet("月初現金提領_土銀")
